@@ -1,0 +1,65 @@
+    internal class Program
+    {
+        class AnimalThread //Объявляем класс для хранения данных о потоках и действиями над ними
+        {
+            private Thread thread;
+            private string n;
+            private int p;
+            private int PriodDist;
+            private static int finish = 300; //Объявляем переменные
+            public AnimalThread(string n, ThreadPriority p) //Конструктор 
+            {
+                this.n = n;
+                this.p = (int)p; //Инициализация переменных
+                thread = new Thread(run); //Создание нового потока с методом run
+                thread.Priority = p; //Установка приоритета
+            }
+            public void StartThread() //Метод запуска потока
+            {
+                thread.Start();
+            }
+            public void JoinThread() //Ожидание завершения потока
+            {
+                thread.Join();
+            }
+
+            public void run() //Объявляем метод run для основных действий над потоками
+            {
+                Random rnd = new Random(); //Объект Random для генерации случайных чисел
+                while (PriodDist < finish) //Проверка
+                {
+                    int d = rnd.Next(0, 31); //Заполняет переменную d случайным расстоянием, пройденным потоком
+                    PriodDist += d; //Переносит это значение в переменную с пройденной дистанцией
+                    Console.WriteLine($"{n} пробежал {PriodDist} метров");
+                    ManagePriorities(); //Вызов методда проверки приоритета
+                    Thread.Sleep(1000); //Потом засыпает на 1с
+                }
+                Console.WriteLine($"{n} ФИНИШИРОВАЛ!");
+            }
+            private void ManagePriorities() //Метод управления приоритетами
+            {
+                if (PriodDist < finish / 2 || PriodDist < finish && PriodDist % 50 == 0) //Если пройденное растояние менше 50 и меньше половины
+                {
+                    if (thread.Priority == ThreadPriority.Highest)
+                    {
+                        thread.Priority++; //Увеличивается приоритет на 1
+                        Console.Write($"Приоритет {n} увеличен до {thread.Priority}");
+                    }
+                }
+            }
+            class KrolikandCherepaha //Основной класс с объектами
+            {
+                static void Main(string[] args)
+                {
+                    AnimalThread krolik = new AnimalThread("Кролик", ThreadPriority.Normal); //Объект кролик
+                    AnimalThread cherepaha = new AnimalThread("Черепашка", ThreadPriority.BelowNormal); //Объект черепаха
+                    krolik.StartThread(); //Запуск потоков
+                    cherepaha.StartThread();
+                    krolik.JoinThread();//Ожидание завершения потоков
+                    cherepaha.JoinThread();
+                    Console.WriteLine("Забег подошел к концу");
+                }
+            }
+        }
+    }
+}
